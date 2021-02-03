@@ -16,8 +16,18 @@ for _ in range(K):
 max_sum = 0
 i_list = K * [0]
 i_list[K - 1] = -1
-
+q_list = K * [None]
 time_dict = {}
+
+
+def log_iteration(func):
+    def _inner(*args):
+        res = func(*args) if len(args) != 0 else func()
+        print(f"lists: {lists} num_list: {num_list} max_sum: {max_sum} q_list: {q_list}")
+        return res
+        # print(f"i_list: {i_list}")
+
+    return _inner
 
 
 def calc_func_time(func):
@@ -32,9 +42,19 @@ def calc_func_time(func):
     return inner
 
 
+@log_iteration
 @calc_func_time
 def calc(num_list: list):
-    return reduce(lambda y, x: y+x ** 2, num_list, 0) % M
+    def calc_q_per_i(i):
+        if i > 0:
+            q_list[i] = (q_list[i - 1] if q_list[i - 1] is not None else calc_q_per_i(i - 1)) + num_list[i] ** 2
+        else:
+            q_list[i] = num_list[i] ** 2
+        return q_list[i]
+
+    q_list[K - 1] = calc_q_per_i(K - 1)
+    return q_list[K - 1]
+    # return reduce(lambda y, x: y+x ** 2, num_list, 0) % M
 
 
 # Check if all lists indexes at the end
@@ -47,16 +67,6 @@ def check_end_iteration():
     return True
 
 
-def log_iteration(func):
-    def _inner():
-        func()
-        print(f"lists: {lists} num_list: {num_list} max_sum: {max_sum}")
-        # print(f"i_list: {i_list}")
-
-    return _inner
-
-
-# @log_iteration
 @calc_func_time
 def iterate_i_list():
     global i_list
@@ -67,8 +77,10 @@ def iterate_i_list():
         return False
 
     i_list[i] += 1
+    q_list[i] = None
     for j in range(i + 1, K):
         i_list[j] = 0
+        q_list[j] = None
     return True
 
 
@@ -81,18 +93,23 @@ while not check_end_iteration():
     def create_num_list():
         global num_list
         num_list = [lists[i][i_list[i]] for i in range(K)]
+
+
     create_num_list()
     cur_sum = calc(num_list)
+
 
     @calc_func_time
     def calc_max_sum():
         global max_sum
         max_sum = max(max_sum, cur_sum)
+
+
     calc_max_sum()
 
 print(max_sum)
 total_time = time.time() - start_time
 for name, val in time_dict.items():
-    print(f"{name}: {'{:.0f}'.format((val/total_time)*100)}%")
+    print(f"{name}: {'{:.0f}'.format((val / total_time) * 100)}%")
 # print(f"total time: {sum(time_dict.values())}")
 # print(f"{K} {M}\n{lists}")
