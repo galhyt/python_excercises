@@ -10,7 +10,7 @@ def print_repr(func):
         else:
             ret = func(self)
 
-        print(f"{self} {args if len(args) > 0 else ''}")
+        print(f"{self} {func.__name__} {args if len(args) > 0 else ''}")
         return ret
     return inner
 
@@ -30,7 +30,7 @@ class LruCache:
         return ','.join(map(str, self.queue))
 
     @print_repr
-    def push(self, key, value=None):
+    def push(self, key, value=True):
         """ Push to start of queue array """
         if key not in self.data:
             bobble_to = self.length - 1
@@ -61,17 +61,26 @@ class LruCache:
         for i in range(min(bobble_to, self.length-2), -1, -1):
             self.queue[i+1] = self.queue[i]
 
-    def pop(self):
-        """ Pop from end of queue """
-        pass
+    @print_repr
+    def get(self, key):
+        """ Get key's value """
+        if key not in self.data:
+            return None
 
+        bobble_to = self.find_in_queue(key)-1
+        self.bobble(bobble_to)
+        self.queue[0] = key
 
-lru = LruCache(5)
+        return self.data[key]
 
 
 def lru_emulation(text_stream: str):
     for c in text_stream:
-        lru.push(c)
+        res = lru.get(c)
+        if res is None:
+            # Get from data repository other than cache and push the result to cache
+            lru.push(c)
 
 
+lru = LruCache(5)
 lru_emulation("ABCADEFGDGHIFJKLMNLMOPQRASGFHTYETEB")
