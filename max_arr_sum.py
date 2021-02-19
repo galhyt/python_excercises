@@ -15,23 +15,19 @@ def get_max_arr_sum(arr):
     ...     txt = file.read()
     ...     get_max_arr_sum(list(map(int, txt.split(' '))))
     151598486
-    [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
     """
+    if len(arr) < 2:
+        return 0 if len(arr) == 0 else max(0, max(arr))
+
     max_dict = [None]*len(arr)
-    for i in range(len(arr)-1, -1, -1):
-        print('\r', i, end='')
-        i_max_val = arr[i]
-        if i+2 < len(arr):
-            i_max_val = max(i_max_val, arr[i] + max(max_dict[i+2:]))
+    max_dict[0] = max(0, arr[0])
+    max_dict[1] = max(max_dict[0], arr[1])
+    for i in range(2, len(arr)):
+        max_dict[i] = max(max_dict[i-1], max_dict[i-2]+arr[i])
 
-        max_dict[i] = i_max_val
-
-    return max(max_dict)
+    return max_dict[-1]
 
 
 if __name__ == '__main__':
     import doctest
-    with open('input1_max_arr_sum.txt', 'r') as file:
-        txt = file.read()
-        get_max_arr_sum(list(map(int, txt.split(' '))))
-    # doctest.testmod(verbose=True)
+    doctest.testmod(verbose=True)
