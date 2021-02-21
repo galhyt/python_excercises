@@ -15,7 +15,23 @@ def log_calls(func):
     return inner
 
 
-@log_calls
+recurse_dict = {}
+def recurse_emulation(func):
+    def inner(n):
+        if func.__name__ not in recurse_dict:
+            recurse_dict.update({func.__name__: []})
+        results_arr = recurse_dict[func.__name__]
+        if len(results_arr) >= n:
+            return results_arr[:n]
+        else:
+            m = len(results_arr) + 1
+            while m <= n:
+                results_arr = recurse_dict[func.__name__] = func(m)
+                m += 1
+            return results_arr
+    return inner
+
+@recurse_emulation
 def get_n_first_primes(n):
     if n == 1:
         return [2]
@@ -28,4 +44,4 @@ def get_n_first_primes(n):
         candidate += 1
 
 
-get_n_first_primes(400)
+pprint.pprint(get_n_first_primes(4000))
